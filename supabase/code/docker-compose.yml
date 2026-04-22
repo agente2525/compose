@@ -173,7 +173,6 @@ services:
       db:
         # Disable this if you are using an external Postgres database
         condition: service_healthy
-        condition: service_healthy
     healthcheck:
       test:
         [
@@ -273,7 +272,6 @@ services:
     depends_on:
       db:
         # Disable this if you are using an external Postgres database
-        condition: service_healthy
         condition: service_healthy
     environment:
       PG_META_PORT: 8080
@@ -423,7 +421,6 @@ services:
       retries: 5
     depends_on:
       db:
-        condition: service_healthy
         condition: service_healthy
     environment:
       PORT: 4000
