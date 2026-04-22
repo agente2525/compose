@@ -454,4 +454,3 @@ services:
 
 volumes:
   db-config:
-remove analytics and vector from supabase compose
