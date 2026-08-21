@@ -71,10 +71,18 @@ e escrita completas via PostgREST, sem passar pela tela de login. A migration
 Aquela senha está queimada: ela ficou pública num HTML estático. A nova
 `PANEL_PASSWORD` tem que ser diferente.
 
+A migration foi aplicada em 21/08/2026. Verificado depois dela: `anon` recebe
+`42501 insufficient privilege` em SELECT, INSERT e DELETE nas duas tabelas,
+com RLS ligada e zero políticas. O painel segue funcionando porque a Edge
+Function usa `service_role`, que ignora RLS.
+
 ## Pontas soltas conhecidas
 
 - O fallback offline (`carregar()`) ainda guarda lançamentos em `localStorage`.
   Some se o browser for compartilhado — vale trocar por um estado em memória.
 - O throttle de login é por instância da função, não global.
+- Os secrets colados no dashboard costumam levar um `\n` junto; a função dá
+  `.trim()` nos dois lados por causa disso. Sem o trim, o login reprova com os
+  valores parecendo idênticos na tela.
 - As tabelas `mp_*` e `vendas_hubla` no mesmo projeto seguem com as policies
   originais; não foram tocadas aqui.

@@ -184,11 +184,6 @@ Deno.serve(async (req) => {
       }
       const senha = String((body as { senha?: unknown }).senha ?? "").trim();
       if (!timingSafeEqual(senha, PANEL_PASSWORD)) {
-        // Diagnóstico temporário: só os tamanhos, nunca o conteúdo.
-        console.error(
-          `login falhou | senha recebida: ${senha.length} chars | ` +
-          `secret configurado: ${PANEL_PASSWORD.length} chars`,
-        );
         return json({ erro: "senha incorreta" }, 401, origin);
       }
       tentativas.delete(ip);
