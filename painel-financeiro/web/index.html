@@ -1,0 +1,1566 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MOR&CO — Painel Financeiro</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0a0a0f; --s1:#111118; --s2:#16161f; --bd:#1e1e2e;
+  --accent:#7C3AED; --amber:#f5a623; --green:#00c875; --blue:#4a90e2;
+  --text:#e8e8f0; --muted:#5a5a7a; --dim:#1e1e2e;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;min-height:100vh;}
+a,button{cursor:pointer;}
+
+/* NAV */
+.nav{display:flex;justify-content:space-between;align-items:center;padding:16px 28px;border-bottom:1px solid var(--bd);background:var(--s1);position:sticky;top:0;z-index:100;}
+.logo{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;letter-spacing:-1px;}
+.logo span{color:var(--accent);}
+.nav-tabs{display:flex;gap:4px;}
+.tab{padding:8px 18px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;background:none;border:1px solid var(--bd);color:var(--muted);transition:.2s;}
+.tab.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.tab:hover:not(.active){border-color:var(--text);color:var(--text);}
+.nav-right{display:flex;align-items:center;gap:12px;}
+.mes-sel{display:flex;align-items:center;gap:8px;}
+.mes-sel label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
+.mes-sel select{background:var(--s2);color:var(--amber);border:1px solid var(--amber);padding:6px 10px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;outline:none;}
+.save-indicator{font-size:10px;color:var(--green);opacity:0;transition:.3s;}
+.save-indicator.show{opacity:1;}
+
+/* PAGES */
+.page{display:none;padding:24px 28px;}
+.page.active{display:block;}
+
+/* GRID */
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.g12{display:grid;grid-template-columns:1fr 2fr;gap:14px;margin-bottom:14px;}
+
+/* CARD */
+.card{background:var(--s1);border:1px solid var(--bd);padding:20px;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--bd);}
+.card.ca::before{background:var(--accent);}
+.card.cg::before{background:var(--green);}
+.card.cb::before{background:var(--amber);}
+.card.cbl::before{background:var(--blue);}
+.clabel{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.cval{font-family:'Syne',sans-serif;font-size:28px;font-weight:700;line-height:1;}
+.csub{font-size:10px;color:var(--muted);margin-top:6px;}
+.ctitle{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse;}
+th{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-align:left;padding:0 0 10px;border-bottom:1px solid var(--bd);}
+th:last-child{text-align:right;}
+td{padding:10px 0;font-size:11px;border-bottom:1px solid var(--dim);vertical-align:middle;}
+td:last-child{text-align:right;}
+tr:last-child td{border-bottom:none;}
+
+/* VALUES */
+.vp{color:var(--green);font-family:'Syne',sans-serif;font-weight:600;}
+.vn{color:var(--accent);font-family:'Syne',sans-serif;font-weight:600;}
+.va{color:var(--amber);font-family:'Syne',sans-serif;font-weight:600;}
+
+/* TAG */
+.tag{display:inline-block;padding:2px 8px;font-size:9px;letter-spacing:1px;text-transform:uppercase;}
+.tp{background:rgba(0,200,117,.12);color:var(--green);}
+.ta{background:rgba(245,166,35,.12);color:var(--amber);}
+
+/* FLOW */
+.fr{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--dim);font-size:11px;}
+.fr:last-child{border-bottom:none;}
+.ft{display:flex;justify-content:space-between;padding:12px 0 0;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;border-top:1px solid var(--accent);margin-top:4px;}
+
+/* ALERT */
+.ar{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--dim);}
+.ar:last-child{border-bottom:none;}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.dr{background:var(--accent);box-shadow:0 0 6px var(--accent);}
+.da{background:var(--amber);}
+.dg{background:var(--green);}
+.ai{flex:1;}
+.ad{font-size:11px;margin-bottom:2px;}
+.adate{font-size:9px;color:var(--muted);}
+
+/* PROGRESS */
+.pw{margin:12px 0 6px;}
+.pl{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-bottom:5px;}
+.pt{height:3px;background:var(--dim);border-radius:2px;overflow:hidden;}
+.pf{height:100%;border-radius:2px;}
+
+/* FORM */
+.form-section{background:var(--s1);border:1px solid var(--bd);padding:24px;margin-bottom:16px;}
+.form-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:20px;color:var(--text);}
+.form-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px;}
+.form-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px;}
+.fgroup{display:flex;flex-direction:column;gap:6px;}
+.fgroup label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
+.fgroup input,.fgroup select{background:var(--s2);border:1px solid var(--bd);color:var(--text);padding:9px 12px;font-family:'DM Mono',monospace;font-size:11px;outline:none;width:100%;transition:.2s;}
+.fgroup input:focus,.fgroup select:focus{border-color:var(--accent);}
+.fgroup select option{background:var(--s2);}
+.btn{padding:10px 20px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;border:none;cursor:pointer;transition:.2s;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:#c73350;}
+.btn-secondary{background:transparent;border:1px solid var(--bd);color:var(--muted);}
+.btn-secondary:hover{border-color:var(--text);color:var(--text);}
+.btn-sm{padding:4px 10px;font-size:9px;}
+.btn-del{background:transparent;border:1px solid rgba(233,69,96,.3);color:var(--accent);padding:3px 8px;font-size:9px;cursor:pointer;}
+.btn-del:hover{background:rgba(233,69,96,.1);}
+.form-actions{display:flex;gap:10px;align-items:center;margin-top:4px;}
+
+/* LIST TABLE */
+.list-table td{font-size:11px;padding:8px 4px;}
+.list-table th{padding:0 4px 8px;}
+.list-table{margin-top:16px;}
+
+/* VENC TABLE */
+.vc-dia{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;}
+
+/* SECTION HEADER */
+.sh{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.sh h3{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;}
+
+/* ROTINA */
+.rotina{background:linear-gradient(135deg,rgba(233,69,96,.06),rgba(74,144,226,.06));border:1px solid rgba(233,69,96,.3);padding:14px 16px;margin-top:14px;}
+.rt{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:8px;}
+.ri{display:flex;flex-wrap:wrap;gap:10px;}
+.ri span{font-size:10px;color:var(--muted);}
+.ri span::before{content:'→ ';color:var(--accent);}
+
+/* EMPTY */
+.empty{text-align:center;color:var(--muted);font-size:11px;padding:24px 0;}
+
+/* EDIT highlight */
+.editing{border-color:var(--amber) !important;}
+
+  /* LOGIN */
+  #login-screen {
+    position:fixed;inset:0;background:var(--bg);
+    display:flex;align-items:center;justify-content:center;
+    z-index:9999;
+  }
+  .login-box {
+    background:var(--s1);border:1px solid var(--bd);
+    padding:48px 40px;width:360px;text-align:center;
+  }
+  .login-logo {
+    font-family:'Syne',sans-serif;font-size:28px;font-weight:800;
+    letter-spacing:-1px;margin-bottom:8px;
+  }
+  .login-logo span{color:var(--accent);}
+  .login-sub {
+    font-size:10px;letter-spacing:3px;text-transform:uppercase;
+    color:var(--muted);margin-bottom:36px;
+  }
+  .login-field {
+    width:100%;background:var(--s2);border:1px solid var(--bd);
+    color:var(--text);padding:12px 14px;font-family:'DM Mono',monospace;
+    font-size:12px;outline:none;margin-bottom:12px;
+    transition:.2s;box-sizing:border-box;
+  }
+  .login-field:focus{border-color:var(--accent);}
+  .login-btn {
+    width:100%;padding:12px;background:var(--accent);color:#fff;
+    border:none;font-family:'DM Mono',monospace;font-size:11px;
+    letter-spacing:2px;text-transform:uppercase;cursor:pointer;
+    transition:.2s;margin-top:4px;
+  }
+  .login-btn:hover{opacity:.85;}
+  .login-error {
+    font-size:10px;color:var(--accent);margin-top:10px;
+    min-height:16px;
+  }
+
+</style>
+<style id="tema-claro">
+:root { --bg:#ffffff !important; --s1:#ffffff !important; --s2:#f7f7f5 !important; --bd:rgba(55,53,47,0.09) !important; --accent:#2383e2 !important; --amber:#d9730d !important; --green:#0f7b6c !important; --blue:#2383e2 !important; --text:#37352f !important; --muted:#787774 !important; --dim:#f1f1ef !important; }
+body, button, input, select, option, table, td, th, span, div, p, label, a, h1, h2, h3 { font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif !important; }
+body { background:#ffffff !important; color:#37352f !important; }
+.clabel, .ctitle, .form-title, th, .tab, .rt, .pl, .mes-sel label, .fgroup label { text-transform:none !important; letter-spacing:0 !important; font-weight:500 !important; }
+.ctitle, .form-title { font-weight:600 !important; color:#37352f !important; }
+.nav { background:#ffffff !important; border-bottom:1px solid rgba(55,53,47,0.09) !important; }
+.logo span { color:#2383e2 !important; }
+.tab { background:transparent !important; border:1px solid rgba(55,53,47,0.12) !important; color:#787774 !important; border-radius:6px !important; font-size:13px !important; }
+.tab.active { background:#f1f1ef !important; border-color:rgba(55,53,47,0.12) !important; color:#37352f !important; }
+.tab:hover:not(.active) { background:#f7f7f5 !important; color:#37352f !important; }
+.mes-sel select { background:#ffffff !important; color:#37352f !important; border:1px solid rgba(55,53,47,0.12) !important; border-radius:4px !important; font-weight:600 !important; font-size:13px !important; }
+.card { background:#ffffff !important; border:1px solid rgba(55,53,47,0.09) !important; border-radius:6px !important; }
+.card::before { display:none !important; }
+th { color:#787774 !important; border-bottom:1px solid rgba(55,53,47,0.09) !important; font-size:12px !important; }
+.vp { color:#0f7b6c !important; font-weight:600 !important; }
+.vn { color:#e03e3e !important; font-weight:600 !important; }
+.va { color:#d9730d !important; font-weight:600 !important; }
+.tp { background:rgba(15,123,108,0.12) !important; color:#0f7b6c !important; }
+.ta { background:rgba(217,115,13,0.12) !important; color:#d9730d !important; }
+.form-section { background:#ffffff !important; border:1px solid rgba(55,53,47,0.09) !important; border-radius:6px !important; }
+.fgroup input, .fgroup select { background:#ffffff !important; border:1px solid rgba(55,53,47,0.12) !important; color:#37352f !important; border-radius:4px !important; }
+.fgroup input:focus, .fgroup select:focus { border-color:#2383e2 !important; }
+.btn-primary { background:#2383e2 !important; color:#fff !important; border-radius:4px !important; }
+.btn-primary:hover { background:#1971c2 !important; }
+.btn-secondary { background:transparent !important; border:1px solid rgba(55,53,47,0.16) !important; color:#37352f !important; border-radius:4px !important; }
+.btn-del { background:transparent !important; border:1px solid rgba(224,62,62,0.3) !important; color:#e03e3e !important; border-radius:3px !important; }
+.btn-del:hover { background:rgba(224,62,62,0.08) !important; }
+.rotina { background:rgba(35,131,226,0.05) !important; border:1px solid rgba(35,131,226,0.2) !important; border-radius:6px !important; }
+.rt { color:#2383e2 !important; }
+.ri span::before { color:#2383e2 !important; }
+.login-modal { background:rgba(255,255,255,0.95) !important; }
+.login-card { background:#ffffff !important; border:1px solid rgba(55,53,47,0.12) !important; border-radius:8px !important; box-shadow:0 8px 24px rgba(0,0,0,0.08) !important; }
+.login-field { background:#ffffff !important; border:1px solid rgba(55,53,47,0.16) !important; color:#37352f !important; }
+.adate, .empty, .csub { color:#787774 !important; }
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">MOR<span>&</span>CO</div>
+    <div class="login-sub">Painel Financeiro</div>
+    <input class="login-field" type="password" id="login-pass" placeholder="Senha" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" id="login-btn" onclick="doLogin()">Entrar</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="logo">MOR<span>&</span>CO</div>
+  <div class="nav-tabs">
+    <button class="tab active" onclick="showPage('dashboard')">Dashboard</button>
+    <button class="tab" onclick="showPage('entradas')">Entradas</button>
+    <button class="tab" onclick="showPage('custos')">Custos</button>
+  </div>
+  <div class="nav-right">
+    <div class="mes-sel">
+      <label>Mês</label>
+      <select id="mes-sel" onchange="renderDashboard()">
+        <option value="jan">Jan</option><option value="fev">Fev</option>
+        <option value="mar">Mar</option><option value="abr" selected>Abr</option>
+        <option value="mai">Mai</option><option value="jun">Jun</option>
+        <option value="jul">Jul</option><option value="ago">Ago</option>
+        <option value="set">Set</option><option value="out">Out</option>
+        <option value="nov">Nov</option><option value="dez">Dez</option>
+      </select>
+    </div>
+    <span class="save-indicator" id="save-ind">✓ Salvo</span>
+  </div>
+</nav>
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="g3" id="kpis"></div>
+  <div style="margin-bottom:14px">
+    <div class="card cg" id="entradas-dash"></div>
+  </div>
+  <div class="g2">
+    <div class="card cb" id="custos-dash"></div>
+    <div class="card cbl" id="resultado-dash"></div>
+  </div>
+  <div class="g2">
+    <div class="card" id="venc-card"></div>
+    <div class="card" id="pend-card"></div>
+  </div>
+</div>
+
+<!-- ENTRADAS -->
+<div class="page" id="page-entradas">
+  <div class="form-section">
+    <div class="form-title" id="entrada-form-title">Nova Entrada</div>
+    <div class="form-grid">
+      <div class="fgroup">
+        <label>Mês</label>
+        <select id="e-mes">
+          <option value="jan">jan</option><option value="fev">fev</option>
+          <option value="mar">mar</option><option value="abr" selected>abr</option>
+          <option value="mai">mai</option><option value="jun">jun</option>
+          <option value="jul">jul</option><option value="ago">ago</option>
+          <option value="set">set</option><option value="out">out</option>
+          <option value="nov">nov</option><option value="dez">dez</option>
+        </select>
+      </div>
+      <div class="fgroup">
+        <label>Data</label>
+        <input type="text" id="e-data" placeholder="DD/MM/AAAA">
+      </div>
+      <div class="fgroup">
+        <label>Projeto</label>
+        <select id="e-proj">
+          <option value="Júlia/PRØ">Júlia / PRØ</option>
+          <option value="Hubla">Hubla</option>
+          <option value="Consultoria">Consultoria</option>
+          <option value="Outros">Outros</option>
+        </select>
+      </div>
+      <div class="fgroup">
+        <label>Status</label>
+        <select id="e-status">
+          <option value="Recebido">Recebido</option>
+          <option value="Pendente">Pendente</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-grid-3">
+      <div class="fgroup" style="grid-column:span 2">
+        <label>Descrição</label>
+        <input type="text" id="e-desc" placeholder="Ex: PRØ — Fixo + Comissão abril">
+      </div>
+      <div class="fgroup">
+        <label>Valor MOR&CO (R$)</label>
+        <input type="number" id="e-val" placeholder="0.00" step="0.01">
+      </div>
+    </div>
+    <div class="fgroup" style="margin-bottom:14px">
+      <label>Observação (opcional)</label>
+      <input type="text" id="e-obs" placeholder="Ex: Fixo R$12k + 10% s/ R$571k + closer R$9.1k">
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" onclick="salvarEntrada()">Adicionar Entrada</button>
+      <button class="btn btn-secondary" onclick="cancelarEdicaoEntrada()" id="btn-cancel-e" style="display:none">Cancelar</button>
+    </div>
+  </div>
+
+  <div class="sh">
+    <h3>Histórico de Entradas</h3>
+    <div style="display:flex;gap:8px;align-items:center">
+      <label style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">Filtrar:</label>
+      <select onchange="renderListaEntradas()" id="filtro-e-mes" style="background:var(--s2);border:1px solid var(--bd);color:var(--text);padding:4px 8px;font-size:10px;outline:none;">
+        <option value="">Todos</option>
+        <option value="jan">jan</option><option value="fev">fev</option>
+        <option value="mar">mar</option><option value="abr">abr</option>
+        <option value="mai">mai</option>
+      </select>
+    </div>
+  </div>
+  <div id="lista-entradas"></div>
+</div>
+
+<!-- CUSTOS -->
+<div class="page" id="page-custos">
+  <div class="form-section">
+    <div class="form-title" id="custo-form-title">Novo Custo</div>
+    <div class="form-grid">
+      <div class="fgroup">
+        <label>Mês</label>
+        <select id="c-mes">
+          <option value="jan">jan</option><option value="fev">fev</option>
+          <option value="mar">mar</option><option value="abr" selected>abr</option>
+          <option value="mai">mai</option><option value="jun">jun</option>
+          <option value="jul">jul</option><option value="ago">ago</option>
+          <option value="set">set</option><option value="out">out</option>
+          <option value="nov">nov</option><option value="dez">dez</option>
+        </select>
+      </div>
+      <div class="fgroup">
+        <label>Data</label>
+        <input type="text" id="c-data" placeholder="DD/MM/AAAA">
+      </div>
+      <div class="fgroup">
+        <label>Categoria</label>
+        <select id="c-cat">
+          <option value="Colaboradores">Colaboradores</option>
+          <option value="Tráfego pago">Tráfego pago</option>
+          <option value="Ferramentas / SaaS">Ferramentas / SaaS</option>
+          <option value="Imposto Notas Fiscais">Imposto Notas Fiscais</option>
+          <option value="Outros / Não recorrentes">Outros / Não recorrentes</option>
+        </select>
+      </div>
+      <div class="fgroup">
+        <label>Status</label>
+        <select id="c-status">
+          <option value="Pago">Pago</option>
+          <option value="Pendente">Pendente</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-grid-3">
+      <div class="fgroup" style="grid-column:span 2">
+        <label>Descrição</label>
+        <input type="text" id="c-desc" placeholder="Ex: NF PJ — Alanis Beatriz">
+      </div>
+      <div class="fgroup">
+        <label>Valor (R$)</label>
+        <input type="number" id="c-val" placeholder="0.00" step="0.01">
+      </div>
+    </div>
+    <div class="fgroup" style="margin-bottom:14px">
+      <label>Observação (opcional)</label>
+      <input type="text" id="c-obs" placeholder="Ex: Gestora de Projetos — dia 25">
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" onclick="salvarCusto()">Adicionar Custo</button>
+      <button class="btn btn-secondary" onclick="cancelarEdicaoCusto()" id="btn-cancel-c" style="display:none">Cancelar</button>
+    </div>
+  </div>
+
+  <div class="sh">
+    <h3>Histórico de Custos</h3>
+    <div style="display:flex;gap:8px;align-items:center">
+      <label style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">Filtrar:</label>
+      <select onchange="renderListaCustos()" id="filtro-c-mes" style="background:var(--s2);border:1px solid var(--bd);color:var(--text);padding:4px 8px;font-size:10px;outline:none;">
+        <option value="">Todos</option>
+        <option value="jan">jan</option><option value="fev">fev</option>
+        <option value="mar">mar</option><option value="abr">abr</option>
+        <option value="mai">mai</option>
+      </select>
+      <select onchange="renderListaCustos()" id="filtro-c-cat" style="background:var(--s2);border:1px solid var(--bd);color:var(--text);padding:4px 8px;font-size:10px;outline:none;">
+        <option value="">Todas categorias</option>
+        <option value="Colaboradores">Colaboradores</option>
+        <option value="Tráfego pago">Tráfego pago</option>
+        <option value="Ferramentas / SaaS">Ferramentas / SaaS</option>
+        <option value="Imposto Notas Fiscais">Imposto Notas Fiscais</option>
+        <option value="Outros / Não recorrentes">Outros</option>
+      </select>
+    </div>
+  </div>
+  <div id="lista-custos"></div>
+</div>
+
+<script>
+// ─── STORAGE ────────────────────────────────────────────────────────────────
+const STORAGE_KEY_E = 'morco_entradas_v5';
+const STORAGE_KEY_C = 'morco_custos_v5';
+
+let ENTRADAS = [];
+let CUSTOS   = [];
+let editandoE = null;
+let editandoC = null;
+
+function salvar() {
+  try {
+    localStorage.setItem(STORAGE_KEY_E, JSON.stringify(ENTRADAS));
+    localStorage.setItem(STORAGE_KEY_C, JSON.stringify(CUSTOS));
+    const ind = document.getElementById('save-ind');
+    ind.classList.add('show');
+    setTimeout(() => ind.classList.remove('show'), 2000);
+  } catch(e) { console.error('Erro ao salvar:', e); }
+}
+
+function carregar() {
+  try {
+    const e = localStorage.getItem(STORAGE_KEY_E);
+    const c = localStorage.getItem(STORAGE_KEY_C);
+    if (e) ENTRADAS = JSON.parse(e);
+    if (c) CUSTOS   = JSON.parse(c);
+  } catch(e) { console.error('Erro ao carregar:', e); }
+}
+
+// ─── DADOS HISTÓRICOS ────────────────────────────────────────────────────────
+const ENTRADAS_HISTORICO = [
+  {id:1, mes:'jan', data:'30/01/2026', desc:'Parcela 1 — Etria', proj:'Consultoria', val:11000, status:'Recebido', obs:'1ª de 3 parcelas'},
+  {id:2, mes:'jan', data:'20/01/2026', desc:'PRØ — Fixo + Comissão + Gabriel', proj:'Júlia/PRØ', val:67740.77, status:'Recebido', obs:'Fixo R$12k + 10% s/ R$544k + 2% s/ R$66k Gabriel'},
+  {id:3, mes:'jan', data:'15/01/2026', desc:'Reembolso custos Breno', proj:'Breno/Hubla', val:14449.21, status:'Recebido', obs:'Jovens de Negócios'},
+  {id:4, mes:'jan', data:'02/01/2026', desc:'Saque Hubla — Breno', proj:'Breno/Hubla', val:2259.67, status:'Recebido', obs:''},
+  {id:5, mes:'jan', data:'05/01/2026', desc:'Saque Hubla — Breno', proj:'Breno/Hubla', val:711.81, status:'Recebido', obs:''},
+  {id:6, mes:'jan', data:'06/01/2026', desc:'Saque Hubla — Breno', proj:'Breno/Hubla', val:207.96, status:'Recebido', obs:''},
+  {id:7, mes:'jan', data:'11/01/2026', desc:'Saque Hubla — Breno', proj:'Breno/Hubla', val:4231.52, status:'Recebido', obs:''},
+  {id:8, mes:'jan', data:'13/01/2026', desc:'Saque Hubla — Breno', proj:'Breno/Hubla', val:2219.32, status:'Recebido', obs:''},
+  {id:9, mes:'jan', data:'15/01/2026', desc:'Saque Hubla — Breno', proj:'Breno/Hubla', val:4761.81, status:'Recebido', obs:''},
+  {id:10, mes:'jan', data:'20/01/2026', desc:'Saque Hubla — Breno', proj:'Breno/Hubla', val:14072.92, status:'Recebido', obs:''},
+  {id:11, mes:'jan', data:'27/01/2026', desc:'Saque Hubla — Breno', proj:'Breno/Hubla', val:3929.86, status:'Recebido', obs:''},
+  {id:12, mes:'jan', data:'30/01/2026', desc:'Saque Hubla — Breno', proj:'Breno/Hubla', val:3640.78, status:'Recebido', obs:''},
+  {id:13, mes:'fev', data:'28/02/2026', desc:'Parcela 2 — Etria', proj:'Consultoria', val:11000, status:'Recebido', obs:'2ª de 3 parcelas'},
+  {id:14, mes:'fev', data:'20/02/2026', desc:'PRØ — Fixo + Comissão + Gabriel', proj:'Júlia/PRØ', val:17243.15, status:'Recebido', obs:'Fixo R$12k + 5% s/ R$92.863 + 2% s/ R$30k Gabriel'},
+  {id:15, mes:'fev', data:'25/02/2026', desc:'Reembolso custos Breno', proj:'Breno/Hubla', val:57376.65, status:'Recebido', obs:'Jovens de Negócios'},
+  {id:16, mes:'fev', data:'02/02/2026', desc:'Saque Hubla — Breno', proj:'Breno/Hubla', val:3640.78, status:'Recebido', obs:''},
+  {id:17, mes:'fev', data:'10/02/2026', desc:'Saque Hubla — Breno', proj:'Breno/Hubla', val:9417.44, status:'Recebido', obs:''},
+  {id:18, mes:'fev', data:'17/02/2026', desc:'Saque Hubla — Breno', proj:'Breno/Hubla', val:5947.49, status:'Recebido', obs:''},
+  {id:19, mes:'fev', data:'19/02/2026', desc:'Saque Hubla — Breno', proj:'Breno/Hubla', val:2693.78, status:'Recebido', obs:''},
+  {id:20, mes:'fev', data:'23/02/2026', desc:'Saque Hubla — Breno', proj:'Breno/Hubla', val:13505.22, status:'Recebido', obs:''},
+  {id:21, mes:'mar', data:'30/03/2026', desc:'Parcela 3 — Etria', proj:'Consultoria', val:10000, status:'Recebido', obs:'3ª e última — contrato encerrado'},
+  {id:22, mes:'mar', data:'20/03/2026', desc:'PRØ — Fixo + Comissão + Gabriel', proj:'Júlia/PRØ', val:15629.39, status:'Recebido', obs:'Fixo R$12k + 5% s/ R$54.987 + 2% s/ R$44k Gabriel'},
+  {id:23, mes:'mar', data:'10/03/2026', desc:'Reembolso custos Breno', proj:'Breno/Hubla', val:319, status:'Recebido', obs:'Jovens de Negócios — parcial'},
+  {id:24, mes:'mar', data:'16/03/2026', desc:'Reembolso custos Breno', proj:'Breno/Hubla', val:27880.24, status:'Recebido', obs:'Jovens de Negócios — último repasse'},
+  {id:25, mes:'mar', data:'07/03/2026', desc:'Saque Hubla — Breno', proj:'Breno/Hubla', val:6472.91, status:'Recebido', obs:''},
+  {id:26, mes:'mar', data:'09/03/2026', desc:'Saque Hubla — Breno', proj:'Breno/Hubla', val:1791.45, status:'Recebido', obs:''},
+  {id:27, mes:'mar', data:'15/03/2026', desc:'Saque Hubla — Breno', proj:'Breno/Hubla', val:1113.33, status:'Recebido', obs:''},
+  {id:28, mes:'mar', data:'24/03/2026', desc:'Saque Hubla — Breno', proj:'Breno/Hubla', val:1025.60, status:'Recebido', obs:''},
+  {id:29, mes:'abr', data:'20/04/2026', desc:'PRØ — Comissão agência', proj:'Júlia/PRØ', val:57178.20, status:'Recebido', obs:'10% s/ R$571.782 · Mor recebeu fixo+closer direto R$20.351,28'},
+  {id:30, mes:'abr', data:'03/04/2026', desc:'Saque Hubla — Breno', proj:'Breno/Hubla', val:2654.35, status:'Recebido', obs:''},
+  {id:31, mes:'abr', data:'08/04/2026', desc:'Saque Hubla — Breno', proj:'Breno/Hubla', val:1735.24, status:'Recebido', obs:''},
+  {id:32, mes:'abr', data:'11/04/2026', desc:'Saque Hubla — Breno', proj:'Breno/Hubla', val:778.23, status:'Recebido', obs:''},
+  {id:33, mes:'abr', data:'14/04/2026', desc:'Saque Hubla — Breno', proj:'Breno/Hubla', val:2946.18, status:'Recebido', obs:''},
+];
+
+const CUSTOS_HISTORICO = [
+  // JAN
+  {id:1,mes:'jan',data:'05/01/2026',desc:'Honorários Contabilidade',cat:'Colaboradores',val:697,status:'Pago',obs:''},
+  {id:2,mes:'jan',data:'05/01/2026',desc:'BGO — BPO Financeiro',cat:'Outros / Não recorrentes',val:1890,status:'Pago',obs:'Desligado'},
+  {id:3,mes:'jan',data:'06/01/2026',desc:'NF PJ — Karol Saiber',cat:'Colaboradores',val:1500,status:'Pago',obs:''},
+  {id:4,mes:'jan',data:'10/01/2026',desc:'Gabriel Fernandes — ferramenta',cat:'Ferramentas / SaaS',val:54.90,status:'Pago',obs:''},
+  {id:5,mes:'jan',data:'12/01/2026',desc:'NF PJ — Elisiane Paulino',cat:'Colaboradores',val:1084.44,status:'Pago',obs:'Parcial jan'},
+  {id:6,mes:'jan',data:'12/01/2026',desc:'NF PJ — Rafael Ferreira',cat:'Colaboradores',val:1500,status:'Pago',obs:''},
+  {id:7,mes:'jan',data:'13/01/2026',desc:'NF PJ — Rayne',cat:'Colaboradores',val:1000,status:'Pago',obs:''},
+  {id:8,mes:'jan',data:'15/01/2026',desc:'Hotmart',cat:'Ferramentas / SaaS',val:116,status:'Pago',obs:''},
+  {id:9,mes:'jan',data:'19/01/2026',desc:'NF PJ — Leonardo Matheus (CJ)',cat:'Colaboradores',val:2000,status:'Pago',obs:''},
+  {id:10,mes:'jan',data:'20/01/2026',desc:'Imposto Notas Fiscais — DAS',cat:'Imposto Notas Fiscais',val:4826.40,status:'Pago',obs:''},
+  {id:11,mes:'jan',data:'20/01/2026',desc:'Agência de Tráfego',cat:'Tráfego pago',val:414.61,status:'Pago',obs:''},
+  {id:12,mes:'jan',data:'20/01/2026',desc:'NF PJ — Yuri Mayron',cat:'Colaboradores',val:1500,status:'Pago',obs:'Desligado mar'},
+  {id:13,mes:'jan',data:'20/01/2026',desc:'ORATE FRATES — vendedor',cat:'Colaboradores',val:4812,status:'Pago',obs:'Desligado mar'},
+  {id:14,mes:'jan',data:'25/01/2026',desc:'Fatura C6 Bank — janeiro',cat:'Outros / Não recorrentes',val:27519.70,status:'Pago',obs:'Total fatura jan'},
+  {id:15,mes:'jan',data:'26/01/2026',desc:'GERENCIE — Alanis',cat:'Colaboradores',val:2000,status:'Pago',obs:''},
+  {id:16,mes:'jan',data:'26/01/2026',desc:'Thamires Cruvinel',cat:'Colaboradores',val:850.98,status:'Pago',obs:'Desligada'},
+  {id:17,mes:'jan',data:'26/01/2026',desc:'NF PJ — Reche (Plus)',cat:'Colaboradores',val:1500,status:'Pago',obs:''},
+  // FEV
+  {id:18,mes:'fev',data:'05/02/2026',desc:'Honorários Contabilidade',cat:'Colaboradores',val:697,status:'Pago',obs:''},
+  {id:19,mes:'fev',data:'05/02/2026',desc:'BGO — BPO Financeiro',cat:'Outros / Não recorrentes',val:1890,status:'Pago',obs:'Último'},
+  {id:20,mes:'fev',data:'10/02/2026',desc:'NF PJ — Rafael Ferreira',cat:'Colaboradores',val:1500,status:'Pago',obs:''},
+  {id:21,mes:'fev',data:'10/02/2026',desc:'Gabriel Fernandes — ferramenta',cat:'Ferramentas / SaaS',val:54.90,status:'Pago',obs:''},
+  {id:23,mes:'fev',data:'13/02/2026',desc:'NF PJ — Rayne',cat:'Colaboradores',val:1000,status:'Pago',obs:''},
+  {id:24,mes:'fev',data:'20/02/2026',desc:'Imposto Notas Fiscais — DAS',cat:'Imposto Notas Fiscais',val:8494.95,status:'Pago',obs:''},
+  {id:25,mes:'fev',data:'20/02/2026',desc:'ORATE FRATES — vendedor',cat:'Colaboradores',val:3619.82,status:'Pago',obs:''},
+  {id:26,mes:'fev',data:'20/02/2026',desc:'NF PJ — Leonardo Matheus (CJ)',cat:'Colaboradores',val:2000,status:'Pago',obs:''},
+  {id:27,mes:'fev',data:'21/02/2026',desc:'NF PJ — Yuri Mayron',cat:'Colaboradores',val:1500,status:'Pago',obs:''},
+  {id:28,mes:'fev',data:'24/02/2026',desc:'GERENCIE — Alanis',cat:'Colaboradores',val:2000,status:'Pago',obs:''},
+  {id:29,mes:'fev',data:'25/02/2026',desc:'Fatura C6 Bank — fevereiro',cat:'Outros / Não recorrentes',val:39519.38,status:'Pago',obs:'Total fatura fev'},
+  {id:30,mes:'fev',data:'26/02/2026',desc:'NF PJ — Elisiane Paulino',cat:'Colaboradores',val:1885.24,status:'Pago',obs:''},
+  {id:31,mes:'fev',data:'27/02/2026',desc:'NF PJ — Reche (Plus)',cat:'Colaboradores',val:1500,status:'Pago',obs:''},
+  // MAR
+  {id:32,mes:'mar',data:'02/03/2026',desc:'NF PJ — Reche (Plus)',cat:'Colaboradores',val:1500,status:'Pago',obs:''},
+  {id:33,mes:'mar',data:'05/03/2026',desc:'Honorários Contabilidade',cat:'Colaboradores',val:697,status:'Pago',obs:''},
+  {id:34,mes:'mar',data:'05/03/2026',desc:'BGO — BPO Financeiro (último)',cat:'Outros / Não recorrentes',val:1890,status:'Pago',obs:''},
+  {id:35,mes:'mar',data:'09/03/2026',desc:'NF PJ — Rafael Ferreira',cat:'Colaboradores',val:1500,status:'Pago',obs:''},
+  {id:36,mes:'mar',data:'10/03/2026',desc:'Gabriel Fernandes — ferramenta',cat:'Ferramentas / SaaS',val:54.90,status:'Pago',obs:''},
+  {id:37,mes:'mar',data:'16/03/2026',desc:'NF PJ — Rayne',cat:'Colaboradores',val:1000,status:'Pago',obs:''},
+  {id:38,mes:'mar',data:'19/03/2026',desc:'NF PJ — Leonardo Matheus (CJ)',cat:'Colaboradores',val:2000,status:'Pago',obs:''},
+  {id:39,mes:'mar',data:'20/03/2026',desc:'Imposto Notas Fiscais — DAS',cat:'Imposto Notas Fiscais',val:9117.67,status:'Pago',obs:''},
+  {id:40,mes:'mar',data:'20/03/2026',desc:'Receita Federal — retenção NF',cat:'Imposto Notas Fiscais',val:245.38,status:'Pago',obs:'NF Thiago — única vez'},
+  {id:41,mes:'mar',data:'20/03/2026',desc:'NF PJ — Elisiane Paulino',cat:'Colaboradores',val:1816.67,status:'Pago',obs:'R$516,67 + R$1.300'},
+  {id:42,mes:'mar',data:'20/03/2026',desc:'ORATE FRATES — rescisão',cat:'Colaboradores',val:4097.05,status:'Pago',obs:'Acerto final'},
+  {id:43,mes:'mar',data:'21/03/2026',desc:'NF PJ — Yuri Mayron (último)',cat:'Colaboradores',val:1500,status:'Pago',obs:''},
+  {id:45,mes:'mar',data:'27/03/2026',desc:'GERENCIE — Alanis',cat:'Colaboradores',val:2000,status:'Pago',obs:''},
+  {id:46,mes:'mar',data:'31/03/2026',desc:'Igor Mello Silva — mentoria',cat:'Outros / Não recorrentes',val:3000,status:'Pago',obs:''},
+  {id:47,mes:'mar',data:'10/03/2026',desc:'Fatura AMEX — tráfego Breno (mar)',cat:'Tráfego pago',val:38337.92,status:'Pago',obs:'Cartão backup — pago via Mor R$35k + Fernandes R$3.337,92'},
+  {id:48,mes:'mar',data:'25/03/2026',desc:'Fatura C6 Carbon — março',cat:'Outros / Não recorrentes',val:7715.15,status:'Pago',obs:'Pago pelo Fernandes'},
+  // ABR
+  {id:60,mes:'abr',data:'01/04/2026',desc:'NF PJ — Karol Saiber',cat:'Colaboradores',val:1500,status:'Pago',obs:''},
+  {id:61,mes:'abr',data:'05/04/2026',desc:'Honorários Contabilidade',cat:'Colaboradores',val:697,status:'Pago',obs:''},
+  {id:62,mes:'abr',data:'09/04/2026',desc:'NF PJ — Rafael',cat:'Colaboradores',val:1500,status:'Pago',obs:''},
+  {id:63,mes:'abr',data:'13/04/2026',desc:'NF PJ — Rayne',cat:'Colaboradores',val:1000,status:'Pago',obs:''},
+  {id:64,mes:'abr',data:'20/04/2026',desc:'NF PJ — Elisiane Paulino',cat:'Colaboradores',val:1385.95,status:'Pago',obs:'R$1.300 + R$85,95 comissão'},
+  {id:65,mes:'abr',data:'20/04/2026',desc:'NF PJ — Leonardo Matheus (CJ)',cat:'Colaboradores',val:2500,status:'Pago',obs:''},
+  {id:66,mes:'abr',data:'20/04/2026',desc:'Imposto DAS — abril',cat:'Imposto Notas Fiscais',val:5923.26,status:'Pago',obs:''},
+  {id:67,mes:'abr',data:'20/04/2026',desc:'Imposto complementar — abril',cat:'Imposto Notas Fiscais',val:268.49,status:'Pago',obs:''},
+  {id:68,mes:'abr',data:'25/04/2026',desc:'NF PJ — Alanis Beatriz',cat:'Colaboradores',val:2000,status:'Pago',obs:''},
+  {id:69,mes:'abr',data:'25/04/2026',desc:'NF PJ — Reche',cat:'Colaboradores',val:1500,status:'Pago',obs:''},
+  {id:70,mes:'abr',data:'25/04/2026',desc:'Fatura C6 Carbon — abril',cat:'Outros / Não recorrentes',val:11849.74,status:'Pago',obs:''},
+  {id:71,mes:'abr',data:'25/04/2026',desc:'Quitação dívida — Fernandes',cat:'Outros / Não recorrentes',val:7791.07,status:'Pago',obs:'Dívida quitada'},
+  {id:72,mes:'abr',data:'25/04/2026',desc:'Retirada — Gabriel Fernandes',cat:'Outros / Não recorrentes',val:5000,status:'Pago',obs:''},
+  {id:73,mes:'abr',data:'25/04/2026',desc:'Retirada — Gabriel Mor',cat:'Outros / Não recorrentes',val:5000,status:'Pago',obs:''},
+  // MAIO — pendentes
+  {id:74,mes:'mai',data:'01/05/2026',desc:'NF PJ — Karol Saiber',cat:'Colaboradores',val:1500,status:'Pago',obs:''},
+  {id:75,mes:'mai',data:'05/05/2026',desc:'Honorários Contabilidade',cat:'Colaboradores',val:697,status:'Pendente',obs:''},
+  {id:76,mes:'mai',data:'09/05/2026',desc:'NF PJ — Rafael',cat:'Colaboradores',val:1500,status:'Pendente',obs:''},
+  {id:77,mes:'mai',data:'10/05/2026',desc:'Fatura cartão — tráfego Breno',cat:'Tráfego pago',val:5682.56,status:'Pendente',obs:'Tráfego Breno no cartão backup'},
+  {id:78,mes:'mai',data:'13/05/2026',desc:'NF PJ — Rayne',cat:'Colaboradores',val:1000,status:'Pendente',obs:''},
+  {id:79,mes:'abr',data:'11/04/2026',desc:'ORATE FRATES — acerto final',cat:'Colaboradores',val:1492.99,status:'Pago',obs:'R$460,64 + R$1.032,35 — rescisão complementar'},
+  {id:80,mes:'mai',data:'03/05/2026',desc:'SHPP Brasil',cat:'Ferramentas / SaaS',val:129.09,status:'Pago',obs:''},
+];
+
+// ─── INIT ───────────────────────────────────────────────────────────────────
+function init() {
+  carregar();
+  // Se não há dados, carrega histórico
+  if (ENTRADAS.length === 0) ENTRADAS = ENTRADAS_HISTORICO.map(e => ({...e}));
+  if (CUSTOS.length === 0)   CUSTOS   = CUSTOS_HISTORICO.map(c => ({...c}));
+  renderDashboard();
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+const fmt = v => v == null ? '—' : 'R$ ' + Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtPct = v => (Number(v)*100).toFixed(1) + '%';
+const getMes = () => document.getElementById('mes-sel').value;
+const nextId = arr => arr.length ? Math.max(...arr.map(x=>x.id))+1 : 1;
+
+function sumE(mes, proj, status) {
+  return ENTRADAS.filter(r =>
+    r.mes === mes &&
+    (!proj || r.proj === proj) &&
+    (!status || r.status === status)
+  ).reduce((s,r) => s + (Number(r.val)||0), 0);
+}
+
+function sumC(mes, cat, status) {
+  return CUSTOS.filter(r =>
+    r.mes === mes &&
+    (!cat || r.cat === cat) &&
+    (!status || r.status === status)
+  ).reduce((s,r) => s + (Number(r.val)||0), 0);
+}
+
+// ─── NAVIGATION ──────────────────────────────────────────────────────────────
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  event.target.classList.add('active');
+  if (name === 'entradas') renderListaEntradas();
+  if (name === 'custos')   renderListaCustos();
+}
+
+// ─── DASHBOARD ───────────────────────────────────────────────────────────────
+function renderDashboard() {
+  const mes = getMes();
+  renderKPIs(mes);
+  renderEntradasDash(mes);
+  renderCustosDash(mes);
+  renderResultadoDash(mes);
+  renderVenc();
+  renderPend(mes);
+}
+
+function renderKPIs(mes) {
+  const rec  = sumE(mes, null, 'Recebido');
+  const prev = sumE(mes, null, null);
+  const cus  = sumC(mes, null, 'Pago');
+  const marg = rec - cus;
+  document.getElementById('kpis').innerHTML = `
+    <div class="card cg">
+      <div class="clabel">Receita Confirmada</div>
+      <div class="cval vp">${fmt(rec)}</div>
+      <div class="csub">Previsto: ${fmt(prev)} · Pendente: ${fmt(prev-rec)}</div>
+    </div>
+    <div class="card ca">
+      <div class="clabel">Custos Pagos</div>
+      <div class="cval vn">${fmt(cus)}</div>
+      <div class="csub">Previsto: ${fmt(sumC(mes,null,null))}</div>
+    </div>
+    <div class="card ${marg>=0?'cg':'ca'}">
+      <div class="clabel">Margem Operacional</div>
+      <div class="cval ${marg>=0?'vp':'vn'}">${fmt(marg)}</div>
+      <div class="csub">${rec>0?fmtPct(marg/rec)+' sobre receita confirmada':'—'}</div>
+    </div>`;
+}
+
+function renderEntradasDash(mes) {
+  const projs = [
+    {label:'Grupo PRØ — Júlia', key:'Júlia/PRØ'},
+    {label:'Hubla',              key:'Hubla'},
+    {label:'Consultoria',       key:'Consultoria'},
+    {label:'Outros',            key:'Outros'},
+  ];
+  const rows = projs.map(p => {
+    const prev = sumE(mes, p.key, null);
+    const rec  = sumE(mes, p.key, 'Recebido');
+    if (prev === 0 && rec === 0) return '';
+    return `<tr><td>${p.label}</td><td>${fmt(prev)}</td><td class="vp">${fmt(rec)}</td><td class="${prev-rec>0?'va':''}">${fmt(prev-rec)}</td></tr>`;
+  }).join('');
+  const tp = sumE(mes,null,null), tr = sumE(mes,null,'Recebido');
+  document.getElementById('entradas-dash').innerHTML = `
+    <div class="ctitle">Entradas do Mês</div>
+    <table><thead><tr><th>Projeto</th><th>Previsto</th><th>Recebido</th><th>Pendente</th></tr></thead>
+    <tbody>${rows||'<tr><td colspan="4" class="empty">Sem lançamentos</td></tr>'}</tbody></table>
+    <div class="ft"><span>Total</span><span class="vp">${fmt(tr)} <span style="font-size:11px;color:var(--muted)">/ ${fmt(tp)}</span></span></div>`;
+}
+
+function renderCustosDash(mes) {
+  const cats = ['Colaboradores','Tráfego pago','Ferramentas / SaaS','Imposto Notas Fiscais','Outros / Não recorrentes'];
+  const rows = cats.map(cat => {
+    const prev = sumC(mes,cat,null);
+    const pago = sumC(mes,cat,'Pago');
+    if (prev === 0) return '';
+    return `<tr><td>${cat}</td><td>${fmt(prev)}</td><td class="vn">${fmt(pago)}</td></tr>`;
+  }).join('');
+  const tp = sumC(mes,null,null), tpago = sumC(mes,null,'Pago');
+  document.getElementById('custos-dash').innerHTML = `
+    <div class="ctitle">Custos do Mês</div>
+    <table><thead><tr><th>Categoria</th><th>Previsto</th><th>Pago</th></tr></thead>
+    <tbody>${rows||'<tr><td colspan="3" class="empty">Sem lançamentos</td></tr>'}</tbody></table>
+    <div class="ft"><span>Total</span><span class="vn">${fmt(tpago)} <span style="font-size:11px;color:var(--muted)">/ ${fmt(tp)}</span></span></div>`;
+}
+
+function renderResultadoDash(mes) {
+  const rec  = sumE(mes,null,'Recebido');
+  const cus  = sumC(mes,null,'Pago');
+  const marg = rec - cus;
+  const pct  = rec > 0 ? marg/rec : 0;
+  const pe   = sumE(mes,null,null) - rec;
+  const pc   = sumC(mes,null,null) - cus;
+  const prog = sumE(mes,null,null) > 0 ? Math.min(100, Math.round(rec/sumE(mes,null,null)*100)) : 0;
+  document.getElementById('resultado-dash').innerHTML = `
+    <div class="ctitle">Resultado do Mês</div>
+    <div class="fr"><span style="color:var(--muted)">Receita confirmada</span><span class="vp">${fmt(rec)}</span></div>
+    <div class="fr"><span style="color:var(--muted)">Custos pagos</span><span class="vn">${fmt(cus)}</span></div>
+    <div class="fr"><span style="color:var(--muted)">Pendente a receber</span><span class="va">${fmt(pe)}</span></div>
+    <div class="fr"><span style="color:var(--muted)">Custo previsto restante</span><span class="va">${fmt(pc)}</span></div>
+    <div class="ft"><span>Margem Operacional</span><span class="${marg>=0?'vp':'vn'}">${fmt(marg)} <span style="font-size:11px;opacity:.6">${fmtPct(pct)}</span></span></div>
+    <div class="pw">
+      <div class="pl"><span>Recebimento do previsto</span><span>${prog}%</span></div>
+      <div class="pt"><div class="pf" style="width:${prog}%;background:${prog>70?'var(--green)':'var(--amber)'}"></div></div>
+    </div>`;
+}
+
+
+
+function renderVenc() {
+  const venc = [
+    {dia:'01',desc:'NF PJ — Karol Saiber',val:'R$ 1.500',tipo:'c'},
+    {dia:'05',desc:'Honorários Contabilidade',val:'R$ 697',tipo:'c'},
+    {dia:'09',desc:'NF PJ — Rafael',val:'R$ 1.500',tipo:'c'},
+    {dia:'13',desc:'NF PJ — Rayne',val:'R$ 1.000',tipo:'c'},
+    {dia:'20',desc:'NF PJ — Elisiane Paulino',val:'R$ 1.300 + variável',tipo:'c'},
+    {dia:'20',desc:'Imposto DAS',val:'variável',tipo:'c'},
+    {dia:'20',desc:'NF PJ — Leonardo Matheus (CJ)',val:'R$ 2.500',tipo:'c'},
+    {dia:'20',desc:'NF PJ — Felipe',val:'R$ 3.000 + variável',tipo:'c'},
+    {dia:'25',desc:'NF PJ — Alanis Beatriz',val:'R$ 2.000',tipo:'c'},
+    {dia:'25',desc:'NF PJ — Reche',val:'R$ 1.500',tipo:'c'},
+    {dia:'25',desc:'Fatura Cartão C6',val:'variável',tipo:'c'},
+    {dia:'25',desc:'Fatura Cartão Itaú',val:'variável',tipo:'c'},
+  ];
+  const rows = venc.map(v => `<tr>
+    <td><span class="vc-dia" style="color:${v.tipo==='r'?'var(--green)':'var(--accent)'}">${v.dia}</span></td>
+    <td style="${v.tipo==='r'?'color:var(--green);font-weight:600':''}">${v.desc}</td>
+    <td style="${v.tipo==='r'?'color:var(--green);font-weight:600':''}">${v.val}</td>
+  </tr>`).join('');
+  document.getElementById('venc-card').innerHTML = `
+    <div class="ctitle">Calendário Fixo Mensal</div>
+    <table><thead><tr><th>Dia</th><th>Descrição</th><th>Ref.</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function renderPend(mes) {
+  const ep = ENTRADAS.filter(r => r.mes===mes && r.status==='Pendente');
+  const cp = CUSTOS.filter(r => r.mes===mes && r.status==='Pendente');
+  const rowsE = ep.length ? ep.map(r=>`<tr><td>${r.desc}</td><td><span class="tag ta">Pendente</span></td><td class="va">${fmt(r.val)}</td></tr>`).join('') : '<tr><td colspan="3" class="empty">Todas recebidas ✓</td></tr>';
+  const rowsC = cp.length ? cp.map(r=>`<tr><td>${r.desc}</td><td><span class="tag ta">Pendente</span></td><td class="va">${fmt(r.val)}</td></tr>`).join('') : '<tr><td colspan="3" class="empty">Todos pagos ✓</td></tr>';
+  document.getElementById('pend-card').innerHTML = `
+    <div class="ctitle">Pendências do Mês</div>
+    <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">A receber</div>
+    <table><thead><tr><th>Descrição</th><th>Status</th><th>Valor</th></tr></thead><tbody>${rowsE}</tbody></table>
+    <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:14px 0 8px">A pagar</div>
+    <table><thead><tr><th>Descrição</th><th>Status</th><th>Valor</th></tr></thead><tbody>${rowsC}</tbody></table>`;
+}
+
+// ─── ENTRADAS CRUD ───────────────────────────────────────────────────────────
+function salvarEntrada() {
+  const mes    = document.getElementById('e-mes').value;
+  const data   = document.getElementById('e-data').value;
+  const desc   = document.getElementById('e-desc').value.trim();
+  const proj   = document.getElementById('e-proj').value;
+  const val    = parseFloat(document.getElementById('e-val').value);
+  const status = document.getElementById('e-status').value;
+  const obs    = document.getElementById('e-obs').value.trim();
+  if (!desc || isNaN(val)) { alert('Preencha descrição e valor.'); return; }
+  if (editandoE !== null) {
+    const idx = ENTRADAS.findIndex(e => e.id === editandoE);
+    if (idx >= 0) ENTRADAS[idx] = {id:editandoE, mes, data, desc, proj, val, status, obs};
+    editandoE = null;
+  } else {
+    ENTRADAS.push({id:nextId(ENTRADAS), mes, data, desc, proj, val, status, obs});
+  }
+  salvar();
+  limparFormEntrada();
+  renderListaEntradas();
+  renderDashboard();
+}
+
+function editarEntrada(id) {
+  const e = ENTRADAS.find(x => x.id === id);
+  if (!e) return;
+  editandoE = id;
+  document.getElementById('e-mes').value    = e.mes;
+  document.getElementById('e-data').value   = e.data;
+  document.getElementById('e-desc').value   = e.desc;
+  document.getElementById('e-proj').value   = e.proj;
+  document.getElementById('e-val').value    = e.val;
+  document.getElementById('e-status').value = e.status;
+  document.getElementById('e-obs').value    = e.obs;
+  document.getElementById('entrada-form-title').textContent = 'Editar Entrada';
+  document.getElementById('btn-cancel-e').style.display = 'inline-block';
+  document.querySelector('.form-section').classList.add('editing');
+  window.scrollTo(0,0);
+}
+
+function excluirEntrada(id) {
+  if (!confirm('Excluir este lançamento?')) return;
+  ENTRADAS = ENTRADAS.filter(e => e.id !== id);
+  salvar(); renderListaEntradas(); renderDashboard();
+}
+
+function toggleStatusEntrada(id) {
+  const e = ENTRADAS.find(x => x.id === id);
+  if (!e) return;
+  e.status = e.status === 'Recebido' ? 'Pendente' : 'Recebido';
+  salvar(); renderListaEntradas(); renderDashboard();
+}
+
+function cancelarEdicaoEntrada() { editandoE = null; limparFormEntrada(); }
+
+function limparFormEntrada() {
+  ['e-data','e-desc','e-val','e-obs'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('e-status').value = 'Recebido';
+  document.getElementById('entrada-form-title').textContent = 'Nova Entrada';
+  document.getElementById('btn-cancel-e').style.display = 'none';
+  document.querySelector('.form-section').classList.remove('editing');
+}
+
+function renderListaEntradas() {
+  const filtroMes = document.getElementById('filtro-e-mes').value;
+  const lista = ENTRADAS
+    .filter(r => !filtroMes || r.mes === filtroMes)
+    .sort((a,b) => {
+      const mo = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+      return mo.indexOf(a.mes) - mo.indexOf(b.mes);
+    });
+
+  if (!lista.length) { document.getElementById('lista-entradas').innerHTML = '<div class="empty">Sem lançamentos</div>'; return; }
+
+  const rows = lista.map(r => `<tr>
+    <td style="color:var(--muted)">${r.mes}</td>
+    <td style="color:var(--muted)">${r.data||'—'}</td>
+    <td>${r.desc}</td>
+    <td style="color:var(--muted);font-size:10px">${r.proj}</td>
+    <td class="vp">${fmt(r.val)}</td>
+    <td><span class="tag ${r.status==='Recebido'?'tp':'ta'}" style="cursor:pointer" onclick="toggleStatusEntrada(${r.id})">${r.status}</span></td>
+    <td style="display:flex;gap:6px;justify-content:flex-end">
+      <button class="btn-del" onclick="editarEntrada(${r.id})">editar</button>
+      <button class="btn-del" onclick="excluirEntrada(${r.id})">✕</button>
+    </td>
+  </tr>`).join('');
+
+  document.getElementById('lista-entradas').innerHTML = `
+    <table class="list-table">
+      <thead><tr><th>Mês</th><th>Data</th><th>Descrição</th><th>Projeto</th><th>Valor</th><th>Status</th><th></th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+// ─── CUSTOS CRUD ─────────────────────────────────────────────────────────────
+function salvarCusto() {
+  const mes    = document.getElementById('c-mes').value;
+  const data   = document.getElementById('c-data').value;
+  const desc   = document.getElementById('c-desc').value.trim();
+  const cat    = document.getElementById('c-cat').value;
+  const val    = parseFloat(document.getElementById('c-val').value);
+  const status = document.getElementById('c-status').value;
+  const obs    = document.getElementById('c-obs').value.trim();
+  if (!desc || isNaN(val)) { alert('Preencha descrição e valor.'); return; }
+  if (editandoC !== null) {
+    const idx = CUSTOS.findIndex(c => c.id === editandoC);
+    if (idx >= 0) CUSTOS[idx] = {id:editandoC, mes, data, desc, cat, val, status, obs};
+    editandoC = null;
+  } else {
+    CUSTOS.push({id:nextId(CUSTOS), mes, data, desc, cat, val, status, obs});
+  }
+  salvar();
+  limparFormCusto();
+  renderListaCustos();
+  renderDashboard();
+}
+
+function editarCusto(id) {
+  const c = CUSTOS.find(x => x.id === id);
+  if (!c) return;
+  editandoC = id;
+  document.getElementById('c-mes').value    = c.mes;
+  document.getElementById('c-data').value   = c.data;
+  document.getElementById('c-desc').value   = c.desc;
+  document.getElementById('c-cat').value    = c.cat;
+  document.getElementById('c-val').value    = c.val;
+  document.getElementById('c-status').value = c.status;
+  document.getElementById('c-obs').value    = c.obs;
+  document.getElementById('custo-form-title').textContent = 'Editar Custo';
+  document.getElementById('btn-cancel-c').style.display = 'inline-block';
+  window.scrollTo(0,0);
+}
+
+function excluirCusto(id) {
+  if (!confirm('Excluir este lançamento?')) return;
+  CUSTOS = CUSTOS.filter(c => c.id !== id);
+  salvar(); renderListaCustos(); renderDashboard();
+}
+
+function toggleStatusCusto(id) {
+  const c = CUSTOS.find(x => x.id === id);
+  if (!c) return;
+  c.status = c.status === 'Pago' ? 'Pendente' : 'Pago';
+  salvar(); renderListaCustos(); renderDashboard();
+}
+
+function cancelarEdicaoCusto() { editandoC = null; limparFormCusto(); }
+
+function limparFormCusto() {
+  ['c-data','c-desc','c-val','c-obs'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('c-status').value = 'Pago';
+  document.getElementById('custo-form-title').textContent = 'Novo Custo';
+  document.getElementById('btn-cancel-c').style.display = 'none';
+}
+
+function renderListaCustos() {
+  const filtroMes = document.getElementById('filtro-c-mes').value;
+  const filtroCat = document.getElementById('filtro-c-cat').value;
+  const mo = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  const lista = CUSTOS
+    .filter(r => (!filtroMes || r.mes===filtroMes) && (!filtroCat || r.cat===filtroCat))
+    .sort((a,b) => mo.indexOf(a.mes)-mo.indexOf(b.mes));
+
+  if (!lista.length) { document.getElementById('lista-custos').innerHTML = '<div class="empty">Sem lançamentos</div>'; return; }
+
+  const rows = lista.map(r => `<tr>
+    <td style="color:var(--muted)">${r.mes}</td>
+    <td style="color:var(--muted)">${r.data||'—'}</td>
+    <td>${r.desc}</td>
+    <td style="color:var(--muted);font-size:10px">${r.cat}</td>
+    <td class="vn">${fmt(r.val)}</td>
+    <td><span class="tag ${r.status==='Pago'?'tp':'ta'}" style="cursor:pointer" onclick="toggleStatusCusto(${r.id})">${r.status}</span></td>
+    <td style="display:flex;gap:6px;justify-content:flex-end">
+      <button class="btn-del" onclick="editarCusto(${r.id})">editar</button>
+      <button class="btn-del" onclick="excluirCusto(${r.id})">✕</button>
+    </td>
+  </tr>`).join('');
+
+  document.getElementById('lista-custos').innerHTML = `
+    <table class="list-table">
+      <thead><tr><th>Mês</th><th>Data</th><th>Descrição</th><th>Categoria</th><th>Valor</th><th>Status</th><th></th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+
+// ─── API DO PAINEL ───────────────────────────────────────────────────────────
+// Todo acesso a dados passa pela Edge Function `painel-api`. Não há chave do
+// Supabase nem senha neste arquivo — o browser só carrega um token de sessão
+// emitido pelo servidor no login.
+const API_URL   = 'https://mxkewplpvtiqkmulhkfs.supabase.co/functions/v1/painel-api';
+const TOKEN_KEY = 'morco_painel_token';
+
+function getToken()      { return sessionStorage.getItem(TOKEN_KEY); }
+function setToken(t)     { sessionStorage.setItem(TOKEN_KEY, t); }
+function limparSessao()  { sessionStorage.removeItem(TOKEN_KEY); }
+
+async function api(acao, extra = {}) {
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(getToken() ? { 'x-painel-token': getToken() } : {})
+    },
+    body: JSON.stringify({ acao, ...extra })
+  });
+  const body = await res.json().catch(() => ({}));
+  if (res.status === 401 && acao !== 'login') {
+    limparSessao();
+    document.getElementById('login-screen').style.display = 'flex';
+    throw new Error('sessão expirada');
+  }
+  if (!res.ok) throw new Error(body.erro || `erro ${res.status}`);
+  return body;
+}
+
+// `listar` traz as duas tabelas de uma vez. O cache curto existe para que o
+// Promise.all([sbGetAll('entradas'), sbGetAll('custos')]) do init vire uma
+// requisição só, em vez de duas.
+let _listaPendente = null;
+function listar() {
+  if (!_listaPendente) {
+    _listaPendente = api('listar').finally(() => {
+      setTimeout(() => { _listaPendente = null; }, 0);
+    });
+  }
+  return _listaPendente;
+}
+
+async function sbGetAll(tabela) {
+  const dados = await listar();
+  return dados[tabela] || [];
+}
+
+async function sbInsert(tabela, linha) {
+  const r = await api('inserir', { tabela, linha });
+  return [r.linha];
+}
+
+async function sbUpdate(tabela, id, linha) {
+  const r = await api('atualizar', { tabela, id, linha });
+  return [r.linha];
+}
+
+async function sbDelete(tabela, id) {
+  return api('excluir', { tabela, id });
+}
+
+// Converter row do Supabase para formato interno
+function rowToEntrada(r) {
+  return { id: r.id, mes: r.mes, data: r.data||'', desc: r.descricao, proj: r.proj, val: Number(r.val), status: r.status, obs: r.obs||'' };
+}
+function rowToCusto(r) {
+  return { id: r.id, mes: r.mes, data: r.data||'', desc: r.descricao, cat: r.cat, val: Number(r.val), status: r.status, obs: r.obs||'' };
+}
+function entradaToRow(e) {
+  return { mes: e.mes, data: e.data||null, descricao: e.desc, proj: e.proj, val: e.val, status: e.status, obs: e.obs||'' };
+}
+function custoToRow(c) {
+  return { mes: c.mes, data: c.data||null, descricao: c.desc, cat: c.cat, val: c.val, status: c.status, obs: c.obs||'' };
+}
+
+// ─── OVERRIDE INIT para usar Supabase ────────────────────────────────────────
+async function initSupabase() {
+  // Mostrar loading
+  document.querySelectorAll('.page').forEach(p => p.style.opacity = '0.5');
+  
+  try {
+    // Carregar dados do Supabase
+    const [eRows, cRows] = await Promise.all([
+      sbGetAll('entradas'),
+      sbGetAll('custos')
+    ]);
+    
+    if (eRows.length === 0 && ENTRADAS_HISTORICO.length > 0) {
+      // Primeiro acesso — popular com histórico
+      showToast('Populando dados históricos...', 'amber');
+      for (const e of ENTRADAS_HISTORICO) {
+        await sbInsert('entradas', entradaToRow(e));
+      }
+      for (const c of CUSTOS_HISTORICO) {
+        await sbInsert('custos', custoToRow(c));
+      }
+      // Recarregar
+      const [e2, c2] = await Promise.all([sbGetAll('entradas'), sbGetAll('custos')]);
+      ENTRADAS = e2.map(rowToEntrada);
+      CUSTOS   = c2.map(rowToCusto);
+    } else {
+      ENTRADAS = eRows.map(rowToEntrada);
+      CUSTOS   = cRows.map(rowToCusto);
+    }
+    
+    document.querySelectorAll('.page').forEach(p => p.style.opacity = '1');
+    showToast('✓ Conectado ao Supabase', 'green');
+    renderDashboard();
+    
+  } catch(err) {
+    document.querySelectorAll('.page').forEach(p => p.style.opacity = '1');
+    console.error('Supabase error:', err);
+    // Fallback para localStorage
+    carregar();
+    if (ENTRADAS.length === 0) ENTRADAS = ENTRADAS_HISTORICO.map(e => ({...e}));
+    if (CUSTOS.length === 0)   CUSTOS   = CUSTOS_HISTORICO.map(c => ({...c}));
+    showToast('⚠ Offline — usando dados locais', 'amber');
+    renderDashboard();
+  }
+}
+
+function showToast(msg, color) {
+  const ind = document.getElementById('save-ind');
+  ind.textContent = msg;
+  ind.style.color = color === 'green' ? 'var(--green)' : color === 'amber' ? 'var(--amber)' : 'var(--accent)';
+  ind.classList.add('show');
+  setTimeout(() => ind.classList.remove('show'), 3000);
+}
+
+// ─── OVERRIDE CRUD para usar Supabase ────────────────────────────────────────
+const _origSalvarEntrada = salvarEntrada;
+salvarEntrada = async function() {
+  const mes    = document.getElementById('e-mes').value;
+  const data   = document.getElementById('e-data').value;
+  const desc   = document.getElementById('e-desc').value.trim();
+  const proj   = document.getElementById('e-proj').value;
+  const val    = parseFloat(document.getElementById('e-val').value);
+  const status = document.getElementById('e-status').value;
+  const obs    = document.getElementById('e-obs').value.trim();
+  if (!desc || isNaN(val)) { alert('Preencha descrição e valor.'); return; }
+  
+  try {
+    if (editandoE !== null) {
+      await sbUpdate('entradas', editandoE, entradaToRow({mes,data,desc,proj,val,status,obs}));
+      const idx = ENTRADAS.findIndex(e => e.id === editandoE);
+      if (idx >= 0) ENTRADAS[idx] = {id:editandoE,mes,data,desc,proj,val,status,obs};
+      editandoE = null;
+    } else {
+      const res = await sbInsert('entradas', entradaToRow({mes,data,desc,proj,val,status,obs}));
+      ENTRADAS.push(rowToEntrada(res[0]));
+    }
+    showToast('✓ Salvo', 'green');
+    limparFormEntrada();
+    renderListaEntradas();
+    renderDashboard();
+  } catch(e) {
+    showToast('✗ Erro ao salvar', 'red');
+    console.error(e);
+  }
+};
+
+const _origSalvarCusto = salvarCusto;
+salvarCusto = async function() {
+  const mes    = document.getElementById('c-mes').value;
+  const data   = document.getElementById('c-data').value;
+  const desc   = document.getElementById('c-desc').value.trim();
+  const cat    = document.getElementById('c-cat').value;
+  const val    = parseFloat(document.getElementById('c-val').value);
+  const status = document.getElementById('c-status').value;
+  const obs    = document.getElementById('c-obs').value.trim();
+  if (!desc || isNaN(val)) { alert('Preencha descrição e valor.'); return; }
+  
+  try {
+    if (editandoC !== null) {
+      await sbUpdate('custos', editandoC, custoToRow({mes,data,desc,cat,val,status,obs}));
+      const idx = CUSTOS.findIndex(c => c.id === editandoC);
+      if (idx >= 0) CUSTOS[idx] = {id:editandoC,mes,data,desc,cat,val,status,obs};
+      editandoC = null;
+    } else {
+      const res = await sbInsert('custos', custoToRow({mes,data,desc,cat,val,status,obs}));
+      CUSTOS.push(rowToCusto(res[0]));
+    }
+    showToast('✓ Salvo', 'green');
+    limparFormCusto();
+    renderListaCustos();
+    renderDashboard();
+  } catch(e) {
+    showToast('✗ Erro ao salvar', 'red');
+    console.error(e);
+  }
+};
+
+const _origExcluirEntrada = excluirEntrada;
+excluirEntrada = async function(id) {
+  if (!confirm('Excluir este lançamento?')) return;
+  try {
+    await sbDelete('entradas', id);
+    ENTRADAS = ENTRADAS.filter(e => e.id !== id);
+    showToast('✓ Removido', 'green');
+    renderListaEntradas(); renderDashboard();
+  } catch(e) { showToast('✗ Erro', 'red'); }
+};
+
+const _origExcluirCusto = excluirCusto;
+excluirCusto = async function(id) {
+  if (!confirm('Excluir este lançamento?')) return;
+  try {
+    await sbDelete('custos', id);
+    CUSTOS = CUSTOS.filter(c => c.id !== id);
+    showToast('✓ Removido', 'green');
+    renderListaCustos(); renderDashboard();
+  } catch(e) { showToast('✗ Erro', 'red'); }
+};
+
+const _origToggleE = toggleStatusEntrada;
+toggleStatusEntrada = async function(id) {
+  const e = ENTRADAS.find(x => x.id === id);
+  if (!e) return;
+  e.status = e.status === 'Recebido' ? 'Pendente' : 'Recebido';
+  try {
+    await sbUpdate('entradas', id, { status: e.status });
+    showToast('✓ Status atualizado', 'green');
+  } catch(err) { console.error(err); }
+  renderListaEntradas(); renderDashboard();
+};
+
+const _origToggleC = toggleStatusCusto;
+toggleStatusCusto = async function(id) {
+  const c = CUSTOS.find(x => x.id === id);
+  if (!c) return;
+  c.status = c.status === 'Pago' ? 'Pendente' : 'Pago';
+  try {
+    await sbUpdate('custos', id, { status: c.status });
+    showToast('✓ Status atualizado', 'green');
+  } catch(err) { console.error(err); }
+  renderListaCustos(); renderDashboard();
+};
+
+// Substituir init por initSupabase
+document.addEventListener('DOMContentLoaded', () => {});
+
+
+// ─── AUTH ────────────────────────────────────────────────────────────────────
+// A senha não existe mais no client: o login é validado pela Edge Function,
+// que devolve um token de sessão assinado e com validade.
+
+function checkAuth() {
+  return !!getToken();
+}
+
+async function doLogin() {
+  const btn  = document.getElementById('login-btn');
+  const erro = document.getElementById('login-error');
+  const p    = document.getElementById('login-pass').value;
+  erro.textContent = '';
+  if (btn) { btn.disabled = true; btn.textContent = 'Entrando...'; }
+
+  try {
+    const { token } = await api('login', { senha: p });
+    setToken(token);
+    document.getElementById('login-pass').value = '';
+    document.getElementById('login-screen').style.display = 'none';
+    initSupabase();
+  } catch (e) {
+    erro.textContent = e.message === 'senha incorreta'
+      ? 'Senha incorreta.'
+      : (e.message || 'Não foi possível entrar.');
+    document.getElementById('login-pass').value = '';
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Entrar'; }
+  }
+}
+
+function logout() {
+  limparSessao();
+  location.reload();
+}
+
+function guardInit() {
+  if (checkAuth()) {
+    document.getElementById('login-screen').style.display = 'none';
+    initSupabase();
+  }
+  // Se não autenticado, login-screen permanece visível
+}
+
+
+guardInit();
+</script>
+
+<style id="list-collapse-style">
+tr.mes-header td { background:#f7f7f5 !important; cursor:pointer; font-weight:600 !important; color:#37352f !important; padding:10px 12px !important; border-bottom:1px solid rgba(55,53,47,0.09) !important; font-size:11px !important; text-transform:uppercase; letter-spacing:0.5px; }
+tr.mes-header td:hover { background:#f1f1ef !important; }
+tr.mes-header .mh-arrow { display:inline-block; width:14px; margin-right:6px; font-size:9px; color:#787774; }
+tr.mes-header .mh-qty { color:#787774; font-weight:400; font-size:10px; margin-left:8px; text-transform:none; letter-spacing:0; }
+tr.mes-header .mh-total { color:#37352f; font-weight:500; font-size:11px; margin-left:auto; float:right; }
+</style>
+<script id="list-collapse-script">
+(function(){
+  var MO = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  var currentMonth = MO[new Date().getMonth()];
+  var collapsedState = {};
+
+  function parseBRL(txt){
+    if (!txt) return 0;
+    var t = String(txt).replace(/[^\d,\-]/g,'').replace(',','.');
+    var n = parseFloat(t);
+    return isNaN(n) ? 0 : n;
+  }
+
+  function fmtBRL(v){
+    return 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits:2, maximumFractionDigits:2 });
+  }
+
+  function groupTableByMonth(containerId){
+    var container = document.getElementById(containerId);
+    if (!container) return;
+    var table = container.querySelector('table');
+    if (!table) return;
+    var thead = table.querySelector('thead');
+    var tbody = table.querySelector('tbody');
+    if (!thead || !tbody) return;
+
+    var rows = Array.from(tbody.querySelectorAll('tr'));
+    if (rows.length === 0) return;
+
+    var groups = {};
+    rows.forEach(function(tr){
+      var firstCell = tr.querySelector('td');
+      var mes = firstCell ? firstCell.textContent.trim() : '?';
+      if (!groups[mes]) groups[mes] = [];
+      groups[mes].push(tr);
+    });
+
+    var colCount = thead.querySelectorAll('th').length;
+
+    tbody.innerHTML = '';
+    MO.forEach(function(m){
+      if (!groups[m] || groups[m].length === 0) return;
+      var stateKey = containerId + '_' + m;
+      if (!(stateKey in collapsedState)){
+        collapsedState[stateKey] = (m !== currentMonth);
+      }
+      var isCollapsed = collapsedState[stateKey];
+
+      var total = 0;
+      groups[m].forEach(function(tr){
+        var vpCell = tr.querySelector('.vp, .vn');
+        if (vpCell) total += parseBRL(vpCell.textContent);
+      });
+
+      var headerRow = document.createElement('tr');
+      headerRow.className = 'mes-header';
+      var arrow = isCollapsed ? '▶' : '▼';
+      var qty = groups[m].length;
+      var td = document.createElement('td');
+      td.colSpan = colCount;
+      td.innerHTML = '<span class="mh-arrow">' + arrow + '</span>' + m.toUpperCase() + '<span class="mh-qty">' + qty + ' lancamentos</span><span class="mh-total">' + fmtBRL(total) + '</span>';
+      td.setAttribute('data-mes', m);
+      td.setAttribute('data-container', containerId);
+      td.onclick = function(){
+        var key = containerId + '_' + m;
+        collapsedState[key] = !collapsedState[key];
+        var trs = tbody.querySelectorAll('tr[data-mes-row="' + m + '"]');
+        trs.forEach(function(t){ t.style.display = collapsedState[key] ? 'none' : ''; });
+        this.querySelector('.mh-arrow').textContent = collapsedState[key] ? '▶' : '▼';
+      };
+      headerRow.appendChild(td);
+      tbody.appendChild(headerRow);
+
+      groups[m].forEach(function(tr){
+        tr.setAttribute('data-mes-row', m);
+        if (isCollapsed) tr.style.display = 'none';
+        tbody.appendChild(tr);
+      });
+    });
+  }
+
+  function wrapRender(fnName, containerId){
+    var orig = window[fnName];
+    if (typeof orig !== 'function') return false;
+    if (orig.__wrapped) return true;
+    var wrapped = function(){
+      var r = orig.apply(this, arguments);
+      try { groupTableByMonth(containerId); } catch(e){ console.error('group', e); }
+      return r;
+    };
+    wrapped.__wrapped = true;
+    window[fnName] = wrapped;
+    return true;
+  }
+
+  function init(){
+    var okE = wrapRender('renderListaEntradas', 'lista-entradas');
+    var okC = wrapRender('renderListaCustos', 'lista-custos');
+    if (!okE || !okC){
+      setTimeout(init, 400);
+      return;
+    }
+    if (document.getElementById('lista-entradas') && document.getElementById('lista-entradas').querySelector('table')){
+      groupTableByMonth('lista-entradas');
+    }
+    if (document.getElementById('lista-custos') && document.getElementById('lista-custos').querySelector('table')){
+      groupTableByMonth('lista-custos');
+    }
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
+<style id="dash-chart-style">
+#dash-annual-chart-wrap { padding:20px; margin-bottom:14px; margin-top:14px; }
+#dash-annual-chart-wrap .ctitle { margin-bottom:14px; }
+#dash-annual-chart-wrap .chart-box { position:relative; height:380px; }
+#dash-annual-chart-wrap .chart-summary { display:flex; gap:24px; margin-top:16px; padding-top:16px; border-top:1px solid rgba(55,53,47,0.09); }
+#dash-annual-chart-wrap .cs-item { flex:1; }
+#dash-annual-chart-wrap .cs-label { font-size:11px; color:#787774; margin-bottom:4px; }
+#dash-annual-chart-wrap .cs-value { font-size:20px; font-weight:600; color:#37352f; }
+#dash-annual-chart-wrap .cs-value.neg { color:#e03e3e; }
+#dash-annual-chart-wrap .cs-value.pos { color:#0f7b6c; }
+#pend-card { display:none !important; }
+#venc-card { grid-column: 1 / -1 !important; }
+</style>
+<script id="dash-annual-chart">
+(function(){
+  var MO = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  var chartInstance = null;
+
+  function loadScript(src, id, cb){
+    if (document.getElementById(id)){
+      var check = setInterval(function(){
+        if (window.Chart && (id !== '__chartjs_dl_cdn__' || window.ChartDataLabels)){
+          clearInterval(check); cb();
+        }
+      }, 100);
+      return;
+    }
+    var s = document.createElement('script');
+    s.id = id;
+    s.src = src;
+    s.onload = cb;
+    document.head.appendChild(s);
+  }
+
+  function ensureChartJs(cb){
+    if (window.Chart && window.ChartDataLabels){
+      try { window.Chart.register(window.ChartDataLabels); } catch(e){}
+      cb();
+      return;
+    }
+    var loadDL = function(){
+      if (window.ChartDataLabels){
+        try { window.Chart.register(window.ChartDataLabels); } catch(e){}
+        cb();
+        return;
+      }
+      loadScript('https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js', '__chartjs_dl_cdn__', function(){
+        try { window.Chart.register(window.ChartDataLabels); } catch(e){}
+        cb();
+      });
+    };
+    if (window.Chart){ loadDL(); return; }
+    loadScript('https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js', '__chartjs_cdn__', loadDL);
+  }
+
+  function injectContainer(){
+    var existing = document.getElementById('dash-annual-chart-wrap');
+    if (existing) return true;
+    var dashPage = document.getElementById('page-dashboard');
+    if (!dashPage) return false;
+    var wrap = document.createElement('div');
+    wrap.id = 'dash-annual-chart-wrap';
+    wrap.className = 'card';
+    wrap.innerHTML = ''
+      + '<div class="ctitle">Faturamento vs Custo — Ano Corrente</div>'
+      + '<div class="chart-box"><canvas id="dash-annual-canvas"></canvas></div>'
+      + '<div class="chart-summary">'
+      +   '<div class="cs-item"><div class="cs-label">Margem Acumulada</div><div class="cs-value" id="dash-margin-total">—</div></div>'
+      +   '<div class="cs-item"><div class="cs-label">Margem Média Mensal</div><div class="cs-value" id="dash-margin-avg">—</div></div>'
+      + '</div>';
+    dashPage.appendChild(wrap);
+    return true;
+  }
+
+  function fmtBRL(v){
+    return 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function fmtCompact(v){
+    var n = Number(v);
+    var abs = Math.abs(n);
+    var sign = n < 0 ? '-' : '';
+    if (abs >= 1000) return sign + 'R$ ' + (abs/1000).toFixed(abs >= 10000 ? 0 : 1).replace('.', ',') + 'k';
+    return sign + 'R$ ' + abs.toFixed(0);
+  }
+
+  function renderChart(){
+    if (!window.Chart) return;
+    if (typeof ENTRADAS === 'undefined' || typeof CUSTOS === 'undefined') return;
+    if (!injectContainer()) return;
+    var canvas = document.getElementById('dash-annual-canvas');
+    if (!canvas) return;
+
+    var currentIdx = new Date().getMonth();
+    var months = MO.slice(0, currentIdx + 1);
+
+    function agg(list, statusMatch){
+      var m = {};
+      list.forEach(function(r){
+        if (r.status !== statusMatch) return;
+        m[r.mes] = (m[r.mes] || 0) + Number(r.val || 0);
+      });
+      return months.map(function(k){ return m[k] || 0; });
+    }
+
+    var receitas = agg(ENTRADAS, 'Recebido');
+    var custos = agg(CUSTOS, 'Pago');
+    var margem = receitas.map(function(r, i){ return r - custos[i]; });
+
+    var margemTotal = margem.reduce(function(a, b){ return a + b; }, 0);
+    var margemAvg = months.length > 0 ? margemTotal / months.length : 0;
+
+    var totEl = document.getElementById('dash-margin-total');
+    var avgEl = document.getElementById('dash-margin-avg');
+    if (totEl){
+      totEl.textContent = fmtBRL(margemTotal);
+      totEl.className = 'cs-value ' + (margemTotal >= 0 ? 'pos' : 'neg');
+    }
+    if (avgEl){
+      avgEl.textContent = fmtBRL(margemAvg);
+      avgEl.className = 'cs-value ' + (margemAvg >= 0 ? 'pos' : 'neg');
+    }
+
+    if (chartInstance) chartInstance.destroy();
+    chartInstance = new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels: months.map(function(m){ return m.charAt(0).toUpperCase() + m.slice(1); }),
+        datasets: [
+          {
+            label: 'Receita Recebida',
+            data: receitas,
+            backgroundColor: 'rgba(15,123,108,0.85)',
+            borderRadius: 4,
+            order: 2,
+            datalabels: {
+              anchor: 'end', align: 'end', offset: 2,
+              color: '#0f7b6c',
+              font: { size: 10, weight: '600' },
+              formatter: function(v){ return v > 0 ? fmtCompact(v) : ''; }
+            }
+          },
+          {
+            label: 'Custo Pago',
+            data: custos,
+            backgroundColor: 'rgba(224,62,62,0.85)',
+            borderRadius: 4,
+            order: 2,
+            datalabels: {
+              anchor: 'end', align: 'end', offset: 2,
+              color: '#e03e3e',
+              font: { size: 10, weight: '600' },
+              formatter: function(v){ return v > 0 ? fmtCompact(v) : ''; }
+            }
+          },
+          {
+            label: 'Lucro do Mês',
+            data: margem,
+            type: 'line',
+            borderColor: '#2383e2',
+            backgroundColor: '#2383e2',
+            borderWidth: 2,
+            pointRadius: 5,
+            pointHoverRadius: 7,
+            pointBackgroundColor: '#2383e2',
+            tension: 0.3,
+            order: 1,
+            datalabels: {
+              anchor: 'end', align: 'top', offset: 6,
+              color: '#2383e2',
+              backgroundColor: 'rgba(255,255,255,0.85)',
+              borderRadius: 3,
+              padding: { top: 2, bottom: 2, left: 4, right: 4 },
+              font: { size: 10, weight: '700' },
+              formatter: function(v){ return fmtCompact(v); }
+            }
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: { padding: { top: 24 } },
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { position: 'top', labels: { font: { size: 11 }, boxWidth: 12 } },
+          tooltip: {
+            callbacks: {
+              label: function(ctx){
+                return ctx.dataset.label + ': ' + fmtBRL(ctx.parsed.y);
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: { color: 'rgba(55,53,47,0.05)' },
+            ticks: { callback: function(v){ return 'R$ ' + Math.round(v/1000) + 'k'; }, font: { size: 10 } }
+          },
+          x: {
+            grid: { display: false },
+            ticks: { font: { size: 11 } }
+          }
+        }
+      }
+    });
+  }
+
+  function tryRender(){
+    ensureChartJs(function(){
+      renderChart();
+    });
+  }
+
+  var _origRender = window.renderDashboard;
+  window.renderDashboard = function(){
+    if (typeof _origRender === 'function') _origRender.apply(this, arguments);
+    tryRender();
+  };
+
+  function init(){
+    if (typeof ENTRADAS === 'undefined' || typeof CUSTOS === 'undefined' || !document.getElementById('page-dashboard')){
+      setTimeout(init, 400);
+      return;
+    }
+    tryRender();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
+<script>(function(){var mo=["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];var mc=mo[new Date().getMonth()];function aplicar(){document.querySelectorAll("select").forEach(function(s){if(Array.from(s.options).some(function(o){return o.value===mc;})){if(s.value!==mc){s.value=mc;s.dispatchEvent(new Event("change",{bubbles:true}));}}});}aplicar();setTimeout(aplicar,500);setTimeout(aplicar,1500);})();</script></body>
+</html>
