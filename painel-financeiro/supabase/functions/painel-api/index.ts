@@ -6,8 +6,10 @@
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const PANEL_PASSWORD = Deno.env.get("PANEL_PASSWORD") ?? "";
-const SESSION_SECRET = Deno.env.get("PANEL_SESSION_SECRET") ?? "";
+// .trim() porque o campo de secret do dashboard costuma levar junto um \n
+// ou espaço no fim do valor colado, e a comparação abaixo é byte a byte.
+const PANEL_PASSWORD = (Deno.env.get("PANEL_PASSWORD") ?? "").trim();
+const SESSION_SECRET = (Deno.env.get("PANEL_SESSION_SECRET") ?? "").trim();
 const ALLOWED_ORIGINS = (Deno.env.get("PANEL_ALLOWED_ORIGINS") ?? "")
   .split(",").map((s) => s.trim()).filter(Boolean);
 
@@ -180,8 +182,13 @@ Deno.serve(async (req) => {
       if (excedeuTentativas(ip)) {
         return json({ erro: "muitas tentativas, tente de novo em alguns minutos" }, 429, origin);
       }
-      const senha = String((body as { senha?: unknown }).senha ?? "");
+      const senha = String((body as { senha?: unknown }).senha ?? "").trim();
       if (!timingSafeEqual(senha, PANEL_PASSWORD)) {
+        // Diagnóstico temporário: só os tamanhos, nunca o conteúdo.
+        console.error(
+          `login falhou | senha recebida: ${senha.length} chars | ` +
+          `secret configurado: ${PANEL_PASSWORD.length} chars`,
+        );
         return json({ erro: "senha incorreta" }, 401, origin);
       }
       tentativas.delete(ip);
