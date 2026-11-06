@@ -61,3 +61,5 @@ O preço é perder informação: dois códigos diferentes podem cair no mesmo ve
 - Suportar outras linguagens via tree-sitter (JS/TS, que é o que existe neste repositório).
 - Trocar o vetor de contagens por embeddings aprendidos e guardar em pgvector (o Supabase já está no repositório).
 - Exportar o grafo para um formato de fichas/notas: cada função vira uma ficha e cada aresta vira um link.
+
+O relatório que cruza este protótipo com o fichario.app, o repositório Matemática e o estado da arte está em [RELATORIO.md](RELATORIO.md).
